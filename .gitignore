@@ -1,3 +1,5 @@
 node_modules
 test
 ari
+package-lock.json
+.env
