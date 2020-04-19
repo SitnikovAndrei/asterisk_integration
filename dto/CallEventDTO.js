@@ -1,5 +1,5 @@
 class CallEventDTO {
-  constructor({contextId, fromNumber, toNumber, state, lineNumber, callType}) {
+  constructor({contextId, fromNumber, toNumber, state, lineNumber, callType, location}) {
     this.timestamp = Date.now();
     this.contextId = contextId;
     this.fromNumber = fromNumber;
@@ -7,6 +7,7 @@ class CallEventDTO {
     this.state = state;
     this.lineNumber = lineNumber;
     this.callType = callType;
+    this.location = location;
   }
 }
 

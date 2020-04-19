@@ -1,5 +1,8 @@
 node_modules
 test
+web1
+web2
 ari
 package-lock.json
 .env
+logs.txt
