@@ -1,4 +1,4 @@
-class EventDTO {
+class CallDTO {
   constructor({contextId, callId, fromNumber, toNumber, state, lineNumber, direction, location}) {
     this.timestamp = Date.now();
     this.contextId = contextId;
@@ -13,4 +13,4 @@ class EventDTO {
 }
 
 
-module.exports = EventDTO;
+module.exports = CallDTO;
