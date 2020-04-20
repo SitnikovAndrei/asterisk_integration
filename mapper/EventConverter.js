@@ -114,17 +114,14 @@ class EventConverter {
 
         if (type == "Hangup") {
             console.log(`Hangup: ${uniqueId}`);
-            console.log(`event: ${JSON.stringify(event)}`);
             let prevCallEvent = this.cacheStore.get(uniqueId);
-            console.log(`prevCallEvent: ${prevCallEvent}`);
-            if (prevCallEvent == null) return;
+            if (prevCallEvent == null || prevCallEvent.state == "disconnected") return;
+
             let direction = prevCallEvent.direction;
             let fromNumber = prevCallEvent.fromNumber;
             let toNumber = prevCallEvent.toNumber;
             let lineNumber = prevCallEvent.lineNumber;
-            let prevState = prevCallEvent.state;
             this.cacheStore.put(uniqueId, null);
-            if (prevState == "disconnected") return;
 
             if (prevCallEvent.location == "ivr"){
                 return new SummaryDTO({

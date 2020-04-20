@@ -17,6 +17,6 @@ let channelsDAO = new ChannelsDAO();
 let cacheStore = new CacheStore();
 let eventConverter = new EventConverter(cacheStore);
 let messageWsService = new MessageWsService(channelsDAO);
-let eventHandler = new EventHandler(messageWsService, eventConverter);
-CreateAmiClient({login: AMI_LOGIN, password: AMI_PASSWORD, host: AMI_HOST, port: AMI_PORT}, eventHandler);
+let eventListener = new EventListener(messageWsService, eventConverter);
+CreateAmiClient({login: AMI_LOGIN, password: AMI_PASSWORD, host: AMI_HOST, port: AMI_PORT}, eventListener);
 СreateWsServer({port: WS_PORT}, channelsDAO);

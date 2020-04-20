@@ -1,12 +1,12 @@
 const AmiClient = require('asterisk-ami-client');
 const client = new AmiClient();
 
-let CreateAmiClient = ({login, password, host, port}, eventHandler)=>{
+let CreateAmiClient = ({login, password, host, port}, eventListener)=>{
     client.connect(login, password, { host: host, port: port })
     .then(amiConnection => {
         client
             .on('connect', () => console.log('connect'))
-            .on('event', eventHandler.handle)
+            .on('event', eventListener.accept)
             .on('disconnect', () => console.log('disconnect'))
             .action({
                 Action: 'Ping'
