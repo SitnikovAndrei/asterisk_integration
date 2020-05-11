@@ -1,4 +1,8 @@
 class CallDTO {
+  created_at = Date.now();
+  answered_at;
+  completed_at;
+
   constructor({
     contextId,
     callId,
@@ -8,7 +12,6 @@ class CallDTO {
     lineNumber,
     direction
   }) {
-    this.timestamp = Date.now();
     this.contextId = contextId;
     this.callId = callId;
     this.fromNumber = fromNumber;

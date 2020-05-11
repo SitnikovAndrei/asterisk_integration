@@ -1,145 +1,126 @@
+const fs = require('fs');
+// const EventHandler = require("./EventHandler");
 const CallDTO = require("../dto/CallDTO");
-const SummaryDTO = require("../dto/SummaryDTO");
-const CacheStoreFactory = require('../service/CacheStoreFactory');
+const ContextDTO = require("../dto/ContextDTO");
 
 class EventHandler {
-    /**
-     * 
-     * @param {CacheStoreFactory} cacheStoreFactory 
-     */
-    constructor(cacheStoreFactory, messageWsService){
-        this.cacheStoreFactory = cacheStoreFactory;
+    callCache = {}
+    contextCache = {}
+
+    constructor(messageWsService) {
         this.messageWsService = messageWsService;
     }
 
-    init(){
-        this.cacheSummaryStore = this.cacheStoreFactory.get("SUMMARY");
+    writeLog(event){
+        fs.appendFileSync("logs.txt", new Date().toString() + " " + JSON.stringify(event) + "\r\n");
     }
-    /**
-     * @param {string} number
-     * @returns {boolean}
-     */
+
+    checkEventType = (type) => {
+        return !(
+            type === "DialBegin" ||
+            type === "DialEnd" ||
+            type === "Hangup" ||
+            type === "Newstate");
+    }
+
+    checkContext = (contextName) => {
+        return !(contextName === "mango-in")
+    }
+    
     isInbound = (number) => {
         return number.length >= 11;
     }
 
-    /**
-     * @param {string} fromNumber
-     * @param {string} toNumber
-     * @returns {boolean}
-     */
     isInternal = (fromNumber, toNumber) => {
         return fromNumber.length < 11 && toNumber.length < 11;
     }
 
-    handle(event){
-        let type = event.Event;
-        let linkedId = event.Linkedid;
-        let uniqueId = event.Uniqueid;
-        let destUniqueId = event.DestUniqueid;
-        let destCallerIdNum = event.DestCallerIDNum
-        let callerIdNum = event.CallerIDNum;
-        let exten = event.Exten;
+    accept = (event) => {
+        this.writeLog(event);
+        let eventType = event.Event;
+        if (this.checkEventType(eventType)) return;
 
-        if (type == "Newstate" && event.ChannelStateDesc == "Ring") {
-            console.log("Newstate");
-            console.log(JSON.stringify(event, null, 2));
-            let _isInbound = this.isInbound(callerIdNum);
-            if (_isInbound){
-                let call = new CallDTO({
-                    "contextId": uniqueId,
-                    "callId": uniqueId,
-                    "fromNumber": callerIdNum,
-                    "toNumber": exten,
-                    "state": "appeared",
-                    "lineNumber": exten,
-                    "direction": "inbound",
-                    "location": "ivr"
-                });
-
-                let summary = new SummaryDTO({
-                    "contextId": uniqueId, 
-                    "fromNumber": callerIdNum, 
-                    "toNumber": exten, 
-                    "direction": "inbound"
-                });
-                this.cacheSummaryStore.put(uniqueId, summary);
-                // this.messageWsService.sendJsonMessage();
-            }
+        if (eventType === "Newstate" && event.Linkedid === event.Uniqueid && event.ChannelStateDesc == "Ring"){
+            let callType = (this.isInbound(event.CallerIDNum)) ? "inbound" : "outbound";
+            let context = this.createContext(event, callType);
+            this.contextCache[event.Linkedid] = context;
+            this.writeLog(context);
         }
 
-        if (type == "DialBegin") {
-            console.log("DialBegin");
-            console.log(JSON.stringify(event, null, 2));
-            // let resultEvents = [];
-            // let prevCallEvent = this.cacheCallStore.get(destUniqueId);
-            if (callerIdNum == null) callerIdNum = destCallerIdNum;
+        if (eventType == "DialBegin" && this.contextCache[event.Linkedid] !== undefined) {
+            // let destCallerIdNum = event.DestCallerIDNum
+            // let callerIdNum = event.CallerIDNum;
 
-            let _isInbound = this.isInbound(callerIdNum);
-            let dialString = event.DialString.replace(/.*\//, "");
-            let direction = _isInbound ? "inbound" : "outbound";
-            let toNumber = (_isInbound || event.Exten == null) ? dialString : event.Exten;
-            let lineNumber = _isInbound ? exten : null;
-            let summary = this.cacheSummaryStore.get(linkedId);
-
-            if (this.isInternal(callerIdNum, toNumber)) return;
+            let context = this.contextCache[event.Linkedid];
+            let lineNumber = (context.direction === "inbount") ? event.Exten : undefined;
+            context.calls.push(event.DestUniqueid);
+            
             let call = new CallDTO({
-                "contextId": linkedId,
-                "callId": destUniqueId,
-                "fromNumber": callerIdNum,
-                "toNumber": toNumber,
+                "contextId": context.contextId,
+                "callId": event.DestUniqueid,
+                "fromNumber": event.CallerIDNum,
+                "toNumber": event.DialString.replace(/.*\//, ""),
                 "state": "appeared",
                 "lineNumber": lineNumber,
-                "direction": direction,
-                "location": "abonent"
+                "direction": context.direction
             });
-            summary.calls[destUniqueId] = call;
+
+            this.callCache[event.DestUniqueid] = call;
             this.messageWsService.sendJsonMessage("1001", call);
-            this.cacheSummaryStore.put(linkedId, summary);
-            // this.cacheCallStore.put(destUniqueId, call);
+            this.writeLog(call);
         }
 
-        if (type == "DialEnd") {
-            console.log(`DialEnd: ${destUniqueId}`);
-            console.log(JSON.stringify(event, null, 2));
-            let summary = this.cacheSummaryStore.get(linkedId);
-            let prevCallEvent = summary.calls[destUniqueId];
-            if (prevCallEvent == null || prevCallEvent.state == "disconnected") return;
+        if (eventType == "DialEnd" && this.callCache[event.DestUniqueid] !== undefined) {
+            let call = Object.assign({}, this.callCache[event.DestUniqueid]);
 
-            let state = (event.DialStatus == "ANSWER") ? "connected" : "disconnected";
-            prevCallEvent.state = state;
-            
-            summary.calls[destUniqueId] = prevCallEvent;
-            this.cacheSummaryStore.put(linkedId, summary);
-
-            this.messageWsService.sendJsonMessage("1001", prevCallEvent);
-        }
-
-        if (type == "Hangup") {
-            console.log(`Hangup: ${uniqueId}`);
-            console.log(JSON.stringify(event, null, 2));
-            let summary = this.cacheSummaryStore.get(linkedId);
-            let prevCallEvent = summary.calls[uniqueId];
-
-            if (linkedId == uniqueId){
-                summary.end = Date.now();
-                console.log(`Summary End: ${summary}`);
-                
-                this.cacheSummaryStore.put(uniqueId, summary);
-                this.messageWsService.sendJsonMessage("1001", summary);
+            if (event.DialStatus == "ANSWER"){
+                call.answered_at = Date.now();
+                call.state = "connected";
+            } else {
+                call.completed_at = Date.now();
+                call.state = "disconnected";
             }
 
-            if (prevCallEvent == null || prevCallEvent.state == "disconnected") return;
-
-            if (prevCallEvent.location == "abonent"){
-                prevCallEvent.state = "disconnected";
-
-                summary.calls[uniqueId] = prevCallEvent;
-                this.cacheSummaryStore.put(uniqueId, summary);
-
-                this.messageWsService.sendJsonMessage("1001", prevCallEvent);
-            }
+            call.state = state;
+            this.messageWsService.sendJsonMessage("1001", call);
+            this.writeLog(call);
         }
+
+        if (eventType == "Hangup" && this.callCache[event.Uniqueid] !== undefined) {
+            let call = Object.assign({}, this.callCache[event.Uniqueid]);
+
+            if (call.state !== "disconnected") {
+                call.completed_at = Date.now();
+                call.state = "disconnected";
+                this.messageWsService.sendJsonMessage("1001", call);
+                this.writeLog(call);
+            }
+            delete this.callCache[event.Uniqueid]
+        }
+
+        if (eventType == "Hangup" && this.contextCache[event.Uniqueid] !== undefined) {
+            let context = Object.assign({}, this.contextCache[event.Uniqueid]);
+            context.completed_at = Date.now();
+            context.state = "end";
+            context.duration = context.completed_at - context.created_at;
+            setTimeout(() => {
+                this.writeLog(call);
+                delete this.contextCache[event.Uniqueid]
+            }, 1000)
+        }
+    }
+
+    createContext(event, type) {
+        let lineNumber = (type === "inbound") ? event.Exten : undefined;
+        return new ContextDTO({
+            "contextId": event.Linkedid,
+            "callId": event.Uniqueid,
+            "fromNumber": event.CallerIDNum,
+            "toNumber": event.Exten,
+            "state": "create",
+            "lineNumber": lineNumber,
+            "direction": "inbound"
+        });
     }
 }
 

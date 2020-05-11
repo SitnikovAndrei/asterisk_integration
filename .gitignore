@@ -4,3 +4,5 @@ ari
 package-lock.json
 .env
 logs.txt
+.idea
+.vscode

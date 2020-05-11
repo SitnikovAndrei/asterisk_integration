@@ -16,9 +16,7 @@ const WS_PORT = process.env.WS_PORT;
 let channelsDAO = new ChannelsDAO();
 let cacheStoreFactory = new CacheStoreFactory();
 let messageWsService = new MessageWsService(channelsDAO);
-// let eventHandler = new EventHandler(cacheStoreFactory, messageWsService);
-// eventHandler.init();
 
-let eventListener = new EventListener(messageWsService);
-CreateAmiClient({login: AMI_LOGIN, password: AMI_PASSWORD, host: AMI_HOST, port: AMI_PORT}, eventListener);
+let eventHandler = new EventHandler(messageWsService);
+let amiClient = CreateAmiClient({login: AMI_LOGIN, password: AMI_PASSWORD, host: AMI_HOST, port: AMI_PORT}, eventHandler);
 СreateWsServer({port: WS_PORT}, channelsDAO);

@@ -1,5 +1,6 @@
 class ContextDTO {
   created_at = Date.now();
+  completed_at;
 
   constructor({
     contextId,
