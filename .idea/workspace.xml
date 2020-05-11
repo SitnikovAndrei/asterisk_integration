@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="4923244a-112f-483c-8188-988bfb50fe51" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/ami/EventListener.js" beforeDir="false" afterPath="$PROJECT_DIR$/ami/EventListener.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dto/SummaryDTO.js" beforeDir="false" afterPath="$PROJECT_DIR$/dto/SummaryDTO.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mapper/EventConverter.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/service/CacheStore.js" beforeDir="false" afterPath="$PROJECT_DIR$/service/CacheStore.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1bdoGiJlhCRvOoz7hw17nDbTAd3" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4923244a-112f-483c-8188-988bfb50fe51" name="Default Changelist" comment="" />
+      <created>1588971238310</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1588971238310</updated>
+    </task>
+    <servers />
+  </component>
+</project>

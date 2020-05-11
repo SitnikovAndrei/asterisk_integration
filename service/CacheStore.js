@@ -1,12 +1,5 @@
 class CacheStore {
-    constructor(){
-        if(this.instance){
-            return this.instance;
-        }
-        this._data = {};
-        this.instance = this;
-    }
-
+    _data = {}
     /**
      * 
      * @param {string} k 
@@ -15,7 +8,6 @@ class CacheStore {
     put(k, v){
         this._data[k] = v;
     }
-
     /**
      * 
      * @param {string} k 

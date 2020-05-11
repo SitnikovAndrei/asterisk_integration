@@ -1,8 +1,8 @@
 const AmiClient = require('asterisk-ami-client');
 const client = new AmiClient();
 
-let CreateAmiClient = ({login, password, host, port}, eventListener)=>{
-    client.connect(login, password, { host: host, port: port })
+let CreateAmiClient = async ({login, password, host, port}, eventListener)=>{
+    await client.connect(login, password, { host: host, port: port })
     .then(amiConnection => {
         client
             .on('connect', () => console.log('connect'))

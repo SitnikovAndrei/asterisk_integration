@@ -1,4 +1,6 @@
-class CallDTO {
+class ContextDTO {
+  created_at = Date.now();
+
   constructor({
     contextId,
     callId,
@@ -8,7 +10,6 @@ class CallDTO {
     lineNumber,
     direction
   }) {
-    this.timestamp = Date.now();
     this.contextId = contextId;
     this.callId = callId;
     this.fromNumber = fromNumber;
@@ -16,8 +17,9 @@ class CallDTO {
     this.state = state;
     this.lineNumber = lineNumber;
     this.direction = direction;
+    this.calls = [];
   }
 }
 
 
-module.exports = CallDTO;
+module.exports = ContextDTO;
