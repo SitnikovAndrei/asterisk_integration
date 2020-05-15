@@ -22,7 +22,7 @@ WsServer(channelsStore);
 
 
 (async () => {
-    await amiClient.init({login: AMI_LOGIN, password: AMI_PASSWORD, host: AMI_HOST, port: AMI_PORT})
+    await amiClient.init(AMI_LOGIN, AMI_PASSWORD, AMI_HOST, AMI_PORT)
     amiClient.addListener("event", eventHandler.handle);
     amiClient.afterPropertiesSet();
 

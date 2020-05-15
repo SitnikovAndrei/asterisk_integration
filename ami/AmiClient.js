@@ -3,7 +3,7 @@ const AsteriskAmiClient = require('asterisk-ami-client');
 class AmiClient {
     client;
 
-    init({login, password, host, port}){
+    init(login, password, host, port){
         this.client = new AsteriskAmiClient();
         return this.client.connect(login, password, { host: host, port: port });
     }
