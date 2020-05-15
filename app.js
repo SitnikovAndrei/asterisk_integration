@@ -1,22 +1,37 @@
-const СreateWsServer = require("./ws/СreateWsServer");
-const MessageWsService = require("./ws/MessageWsService");
-const ChannelsDAO = require("./ws/ChannelsDAO");
-const EventListener = require('./ami/EventListener');
-const EventHandler = require('./ami/EventHandler');
-const CreateAmiClient = require('./ami/CreateAmiClient');
-const CacheStoreFactory = require('./service/CacheStoreFactory');
-require('dotenv').config();
+const express = require('express')
+const app = express()
+const MessageWsService = require("./ws/MessageWsService")
+const WsServer = require("./ws/WsServer")
+const ChannelsStore = require("./ws/ChannelsStore")
+const EventHandler = require('./ami/EventHandler')
+const AmiClient = require('./ami/AmiClient')
+const AmiRestService = require('./ami/AmiRestService')
+require('dotenv').config()
+
 
 const AMI_LOGIN = process.env.AMI_LOGIN;
 const AMI_PASSWORD = process.env.AMI_PASSWORD;
 const AMI_HOST = process.env.AMI_HOST;
 const AMI_PORT = process.env.AMI_PORT;
-const WS_PORT = process.env.WS_PORT;
 
-let channelsDAO = new ChannelsDAO();
-let cacheStoreFactory = new CacheStoreFactory();
-let messageWsService = new MessageWsService(channelsDAO);
-
+let channelsStore = new ChannelsStore();
+let messageWsService = new MessageWsService(channelsStore);
 let eventHandler = new EventHandler(messageWsService);
-let amiClient = CreateAmiClient({login: AMI_LOGIN, password: AMI_PASSWORD, host: AMI_HOST, port: AMI_PORT}, eventHandler);
-СreateWsServer({port: WS_PORT}, channelsDAO);
+let amiClient = new AmiClient();
+WsServer(channelsStore);
+
+
+(async () => {
+    await amiClient.init({login: AMI_LOGIN, password: AMI_PASSWORD, host: AMI_HOST, port: AMI_PORT})
+    amiClient.addListener("event", eventHandler.handle);
+    amiClient.afterPropertiesSet();
+
+    let amiRestService = new AmiRestService(amiClient.client);
+    app.get('/', function (req, res) {
+        amiRestService.callback("79153979336");
+        res.send('Hello World')
+    })
+})()
+
+   
+app.listen(3000)

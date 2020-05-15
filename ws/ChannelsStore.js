@@ -1,4 +1,4 @@
-class ChannelsDAO {
+class ChannelsStore {
     channels = {};
     addChannel(id, channel){
         this.channels[id] = channel;
@@ -17,4 +17,4 @@ class ChannelsDAO {
     }
 }
 
-module.exports = ChannelsDAO;
+module.exports = ChannelsStore;

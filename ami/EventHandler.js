@@ -35,8 +35,8 @@ class EventHandler {
         return fromNumber.length < 11 && toNumber.length < 11;
     }
 
-    accept = (event) => {
-        this.writeLog(event);
+    handle = (event) => {
+        // this.writeLog(event);
         let eventType = event.Event;
         if (this.checkEventType(eventType)) return;
 
@@ -81,7 +81,7 @@ class EventHandler {
                 call.state = "disconnected";
             }
 
-            call.state = state;
+            this.callCache[event.DestUniqueid] = call;
             this.messageWsService.sendJsonMessage("1001", call);
             this.writeLog(call);
         }
@@ -104,7 +104,7 @@ class EventHandler {
             context.state = "end";
             context.duration = context.completed_at - context.created_at;
             setTimeout(() => {
-                this.writeLog(call);
+                this.writeLog(context);
                 delete this.contextCache[event.Uniqueid]
             }, 1000)
         }
@@ -119,7 +119,7 @@ class EventHandler {
             "toNumber": event.Exten,
             "state": "create",
             "lineNumber": lineNumber,
-            "direction": "inbound"
+            "direction": type
         });
     }
 }
